@@ -1,0 +1,3 @@
+class AGStateMachine(n: Int) {
+    
+}
