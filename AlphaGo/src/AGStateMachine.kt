@@ -1,10 +1,19 @@
 class AGStateMachine(private val mainBlock: AGStateMachine.() -> Unit) {
     val states = mutableListOf<AGState>()
-    var currentState = 0
+    private var currentState = 0
+    val runningState
+        get() = states[currentState]
+
+    private val oneTimes = arrayListOf(OneTime(), OneTime())
 
     init {
+        oneTimes.forEach { it.reset() }
         states.clear()
         mainBlock()
+    }
+
+    private fun resetTransition() {
+        oneTimes.forEach { it.reset() }
     }
 
     fun state(name: String, block: AGState.() -> Unit) {
@@ -17,7 +26,13 @@ class AGStateMachine(private val mainBlock: AGStateMachine.() -> Unit) {
     }
 
     fun run() {
-        states[currentState].enterAction?.invoke()
+        states.forEach {
+            if (it == states[currentState]) {
+                oneTimes.first().runAction { states[currentState].enterAction?.invoke() }
+                //loop
+                oneTimes.last().runAction { states[currentState].exitAction?.invoke() }
+            }
+        }
     }
 
     fun AGState.enter(block: () -> Unit) {
@@ -30,6 +45,12 @@ class AGStateMachine(private val mainBlock: AGStateMachine.() -> Unit) {
 
     fun AGState.exit(block: () -> Unit) {
         states.last().exitAction = block
+    }
+
+    fun nextState(name: String) {
+        resetTransition()
+        println("eek: ${states.indexOf(states.find { it.name == name })}")
+        currentState = states.indexOf(states.find { it.name == name })
     }
 }
 
