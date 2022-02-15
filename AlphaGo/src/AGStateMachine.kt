@@ -18,13 +18,6 @@ class AGStateMachine(private val mainBlock: AGStateMachine.() -> Unit) {
         loops = 0
     }
 
-    fun state(name: String, block: AGState.() -> Unit) {
-        if (states.any { it.name == name }) throw IllegalArgumentException("State with name $name already exists")
-        val myState = AGState(name, block)
-        states.add(myState)
-        block(myState)
-    }
-
     fun run() {
         states.forEach {
             if (it == states[currentState]) {
@@ -40,6 +33,18 @@ class AGStateMachine(private val mainBlock: AGStateMachine.() -> Unit) {
         }
     }
 
+    fun state(name: String, block: AGState.() -> Unit) {
+        if (states.any { it.name == name }) throw IllegalArgumentException("State with name $name already exists")
+        val myState = AGState(name, block)
+        states.add(myState)
+        block(myState)
+    }
+
+    fun nextState(name: String) {
+        resetTransition()
+        currentState = states.indexOf(states.find { it.name == name })
+    }
+
     fun AGState.enter(block: () -> Unit) {
         states.last().enterAction = block
     }
@@ -52,15 +57,10 @@ class AGStateMachine(private val mainBlock: AGStateMachine.() -> Unit) {
         states.last().exitAction = block
     }
 
-    fun nextState(name: String) {
-        resetTransition()
-        currentState = states.indexOf(states.find { it.name == name })
-    }
+    data class AGState(var name: String, var block: AGState.() -> Unit,
+                       var enterAction: (() -> Unit)? = null,
+                       var loopAction: (() -> Boolean)? = null,
+                       var exitAction: (() -> Unit)? = null,
+                       var isCompleted: Boolean = false
+    )
 }
-
-data class AGState(var name: String, var block: AGState.() -> Unit,
-                   var enterAction: (() -> Unit)? = null,
-                   var loopAction: (() -> Boolean)? = null,
-                   var exitAction: (() -> Unit)? = null,
-                   var isCompleted: Boolean = false
-)
