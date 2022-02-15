@@ -4,8 +4,17 @@ fun main() {
     val agStateMachine = AGStateMachine {
         state("s1") {
             enter {
+                println("enter")
                 name = "b1"
-                nextState("s2")
+            }
+
+            loop {
+                println("loop")
+                name == "b1"
+            }
+
+            exit {
+                println("exit")
             }
         }
 

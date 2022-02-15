@@ -29,8 +29,8 @@ class AGStateMachine(private val mainBlock: AGStateMachine.() -> Unit) {
         states.forEach {
             if (it == states[currentState]) {
                 oneTimes.first().runAction { states[currentState].enterAction?.invoke() }
-                //loop
-                oneTimes.last().runAction { states[currentState].exitAction?.invoke() }
+                val exit = states[currentState].loopAction?.invoke()
+                if (exit!!) oneTimes.last().runAction { states[currentState].exitAction?.invoke() }
             }
         }
     }
@@ -39,7 +39,7 @@ class AGStateMachine(private val mainBlock: AGStateMachine.() -> Unit) {
         states.last().enterAction = block
     }
 
-    fun AGState.loop(block: () -> Unit) {
+    fun AGState.loop(block: () -> Boolean) {
         states.last().loopAction = block
     }
 
@@ -56,6 +56,6 @@ class AGStateMachine(private val mainBlock: AGStateMachine.() -> Unit) {
 
 data class AGState(var name: String, var block: AGState.() -> Unit,
                    var enterAction: (() -> Unit)? = null,
-                   var loopAction: (() -> Unit)? = null,
+                   var loopAction: (() -> Boolean)? = null,
                    var exitAction: (() -> Unit)? = null
 )
