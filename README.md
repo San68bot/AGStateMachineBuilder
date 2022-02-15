@@ -4,7 +4,7 @@ This is a library for easy creation of state machines using advanced concepts of
 As of 2/15/2022, this library only works in kotlin, but will be expanded to work in Java later
 (whenever I get bored enough to rewrite an entire code structure in java :/ ).
 ## Usage
-For creating a state machine, you can use the [AGStateMachineBuilder] class, such as follows:
+For creating a state machine, you can use the [AGStateMachineBuilder.kt](src/AGStateMachine) class, such as follows:
 ```kotlin
 val stateMachine = AGStateMachineBuilder {
     state("first") {
