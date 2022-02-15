@@ -1,0 +1,37 @@
+import java.util.*
+
+object k {
+    val listOfBlocks = mutableListOf<blockTest.() -> Unit>()
+}
+
+class blockTest(private val blockTest: blockTest.() -> Unit = {}) {
+    init {
+        k.listOfBlocks.add(blockTest)
+    }
+}
+
+enum class testEnum {
+    A, B, C
+}
+
+class storableBlock(private val block: storableBlock.() -> Unit) {
+    val listOfBlocks = mutableListOf<storableBlock.() -> Unit>()
+
+    var readme = "n/a"
+
+    init {
+        listOfBlocks.add(block)
+    }
+    fun run() {
+        listOfBlocks.forEach { it() }
+    }
+}
+
+fun main() {
+    val test = storableBlock {
+        readme = "Hello"
+    }
+    println(test.readme)
+    test.run()
+    println(test.readme)
+}
