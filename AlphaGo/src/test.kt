@@ -35,8 +35,8 @@ fun main() {
         }
     }
     while (!agStateMachine.allStatesCompleted){
-        agStateMachine.run()
-        println("ASC ${agStateMachine.allStatesCompleted}")
+        val isdone = agStateMachine.run()
+        println("ASC $isdone")
     }
 
     //println(agStateMachine.states.toString())

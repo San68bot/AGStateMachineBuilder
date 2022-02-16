@@ -5,7 +5,7 @@ class AGStateMachine(private val mainBlock: AGStateMachine.() -> Unit) {
 
     private val oneTimes = arrayListOf(OneTime(), OneTime())
     var allStatesCompleted = false
-    var loops = 0
+    var loops = 0 //this is just for TESTING, do not use it in your code
 
     init {
         oneTimes.forEach { it.reset() }
@@ -18,7 +18,7 @@ class AGStateMachine(private val mainBlock: AGStateMachine.() -> Unit) {
         loops = 0
     }
 
-    fun run() {
+    fun run(): Boolean {
         states.forEach {
             if (it == states[currentState]) {
                 loops++
@@ -31,6 +31,7 @@ class AGStateMachine(private val mainBlock: AGStateMachine.() -> Unit) {
                 allStatesCompleted = (states[currentState] == states.last()) && (!oneTimes.last().isActive())
             }
         }
+        return allStatesCompleted
     }
 
     fun state(name: String, block: AGState.() -> Unit) {
