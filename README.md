@@ -19,6 +19,7 @@ val stateMachine = AGStateMachineBuilder {
         
         exit {
             //code that runs one time when exiting the state
+            nextState("second")
         }
     }
     
@@ -34,6 +35,7 @@ val stateMachine = AGStateMachineBuilder {
         
         exit {
             //code that runs one time when exiting the state
+            //since this is the last state, we dont need a next stage call here
         }
     }
 }
