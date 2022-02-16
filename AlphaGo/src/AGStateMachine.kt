@@ -1,21 +1,29 @@
+import utils.ElapsedTime
+import utils.OneTime
+
 class AGStateMachine(private val mainBlock: AGStateMachine.() -> Unit) {
     private val states = mutableListOf<AGState>()
-    private var currentState = 0
-    val runningState get() = states[currentState]
-
     private val oneTimes = arrayListOf(OneTime(), OneTime())
+
+    private var currentState = 0
+    val runningState get() = states[currentState].name
     var allStatesCompleted = false
+
     var loops = 0 //this is just for TESTING, do not use it in your code
+    private val stateTimer = ElapsedTime()
+    val timeInCurrentState get() = stateTimer.seconds()
 
     init {
         oneTimes.forEach { it.reset() }
         states.clear()
+        stateTimer.reset()
         mainBlock()
     }
 
     private fun resetTransition() {
-        oneTimes.forEach { it.reset() }
         loops = 0
+        oneTimes.forEach { it.reset() }
+        stateTimer.reset()
     }
 
     fun run(): Boolean {

@@ -25,8 +25,8 @@ fun main() {
             }
 
             loop {
-                println("loop2: $loops")
-                name == "b2" && loops == 2
+                println("loop2: $loops at time $timeInCurrentState")
+                name == "b2" && loops == 2000
             }
 
             exit {

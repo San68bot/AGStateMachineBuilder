@@ -1,5 +1,7 @@
+package utils
+
 class OneTime {
-    var oneTimeVar = true
+    private var oneTimeVar = true
     fun runAction(runnable: Runnable) {
         if (oneTimeVar) {
             oneTimeVar = false
