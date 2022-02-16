@@ -1,5 +1,3 @@
-import java.lang.Thread.sleep
-
 fun main() {
     val agStateMachine = AGStateMachine {
         state("s1") {

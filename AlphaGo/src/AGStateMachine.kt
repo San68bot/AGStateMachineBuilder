@@ -33,8 +33,8 @@ class AGStateMachine(private val mainBlock: AGStateMachine.() -> Unit) {
                 oneTimes.first().runAction { states[currentState].enterAction?.invoke() }
                 val exit = states[currentState].loopAction?.invoke()
                 if (exit!!) oneTimes.last().runAction {
-                    states[currentState].exitAction?.invoke()
                     states[currentState].isCompleted = true
+                    states[currentState].exitAction?.invoke()
                 }
                 allStatesCompleted = (states[currentState] == states.last()) && (!oneTimes.last().isActive())
             }
