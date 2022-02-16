@@ -1,5 +1,6 @@
-import java.util.*
-
+/*
+this file is just for testing purposes such as storing and using data from dsl's
+ */
 object k {
     val listOfBlocks = mutableListOf<blockTest.() -> Unit>()
 }
