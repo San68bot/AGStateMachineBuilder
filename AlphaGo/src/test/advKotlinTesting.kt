@@ -28,11 +28,25 @@ class storableBlock(private val block: storableBlock.() -> Unit) {
     }
 }
 
+fun interface runner {
+    fun run()
+}
+
+var c = 0
+
+fun a(a: runner) {
+    a.run()
+}
+
 fun main() {
-    val test = storableBlock {
+    /*val test = storableBlock {
         readme = "Hello"
     }
     println(test.readme)
     test.run()
-    println(test.readme)
+    println(test.readme)*/
+    a {
+        c++
+    }
+    println(c)
 }
