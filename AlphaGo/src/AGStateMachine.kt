@@ -51,7 +51,9 @@ class AGStateMachine(private val mainBlock: AGStateMachine.() -> Unit) {
 
     fun nextState(name: String) {
         resetTransition()
-        currentState = states.indexOf(states.find { it.name == name })
+        val nextState = states.find { it.name == name }
+            ?: throw IllegalArgumentException("State with name $name does not exist")
+        currentState = states.indexOf(nextState)
     }
 
     fun AGState.enter(block: () -> Unit) {
