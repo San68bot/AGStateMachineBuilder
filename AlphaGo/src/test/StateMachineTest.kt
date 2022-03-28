@@ -1,45 +1,28 @@
 fun main() {
-    val agStateMachine = AGStateMachine {
-        state("s1") {
+    val agsm = AGStateMachine {
+        state("state1") {
             enter {
-                println("enter1")
-                name = "b1"
+                println("Entering state1")
             }
 
             loop {
-                println("loop1: $loops")
-                name == "b1"
+                println("Looping state1")
+                true
             }
 
             exit {
-                println("exit1")
-                nextState("s2")
+                println("Exiting state1")
+                nextState()
             }
         }
-        state("s2") {
-            enter {
-                println("enter2")
-                name = "b2"
-            }
 
-            loop {
-                println("loop2: $loops at time $timeInCurrentState")
-                name == "b2" && loops == 2000
-            }
-
+        state("state2") {
             exit {
-                println("exit2")
+                println("Exiting state2")
             }
         }
     }
-    while (!agStateMachine.allStatesCompleted){
-        val isdone = agStateMachine.run()
-        println("ASC $isdone")
+    while (!agsm.allStatesCompleted){
+        agsm.run()
     }
-
-    //println(agStateMachine.states.toString())
-    //println("ASC ${agStateMachine.allStatesCompleted}")
-    //println(agStateMachine.runningState.name)
-    //println(agStateMachine.states.size)
-    //println(agStateMachine.states[0].block)
 }

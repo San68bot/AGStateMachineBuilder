@@ -1,42 +1,43 @@
-import utils.ElapsedTime
 import utils.OneTime
 
-class AGStateMachine(private val mainBlock: AGStateMachine.() -> Unit) {
+class AGStateMachine(mainBlock: AGStateMachine.() -> Unit) {
     private val states = mutableListOf<AGState>()
-    private val oneTimes = arrayListOf(OneTime(), OneTime())
-
     private var currentState = 0
-    val runningState get() = states[currentState].name
+    val runningState get() = states[currentState]
     var allStatesCompleted = false
 
-    var loops = 0 //this is just for TESTING, do not use it in your code
-    private val stateTimer = ElapsedTime()
-    val timeInCurrentState get() = stateTimer.seconds()
+    private val oneTimes = arrayListOf(OneTime(), OneTime())
 
     init {
         oneTimes.forEach { it.reset() }
         states.clear()
-        stateTimer.reset()
         mainBlock()
     }
 
     private fun resetTransition() {
-        loops = 0
         oneTimes.forEach { it.reset() }
-        stateTimer.reset()
     }
 
     fun run(): Boolean {
+        if (allStatesCompleted) return true
         states.forEach {
             if (it == states[currentState]) {
-                loops++
                 oneTimes.first().runAction { states[currentState].enterAction?.invoke() }
-                val exit = states[currentState].loopAction?.invoke()
-                if (exit!!) oneTimes.last().runAction {
-                    states[currentState].isCompleted = true
-                    states[currentState].exitAction?.invoke()
+                val exit = states[currentState].loopAction?.invoke()!!
+                when {
+                    exit && states[currentState].exitAction == null -> {
+                        states[currentState].isCompleted = true
+                        nextState()
+                    }
+
+                    exit && states[currentState].exitAction != null -> {
+                        oneTimes.last().runAction {
+                            states[currentState].exitAction?.invoke()
+                            states[currentState].isCompleted = true
+                        }
+                        if (!allStatesCompleted) allStatesCompleted = (states[currentState] == states.last()) && (!oneTimes.last().isActive())
+                    }
                 }
-                allStatesCompleted = (states[currentState] == states.last()) && (!oneTimes.last().isActive())
             }
         }
         return allStatesCompleted
@@ -56,6 +57,16 @@ class AGStateMachine(private val mainBlock: AGStateMachine.() -> Unit) {
         currentState = states.indexOf(nextState)
     }
 
+    fun nextState() {
+        resetTransition()
+        if (currentState == states.lastIndex) {
+            allStatesCompleted = true
+            states[currentState].isCompleted = true
+        } else {
+            currentState++
+        }
+    }
+
     fun AGState.enter(block: () -> Unit) {
         states.last().enterAction = block
     }
@@ -70,7 +81,7 @@ class AGStateMachine(private val mainBlock: AGStateMachine.() -> Unit) {
 
     data class AGState(var name: String, var block: AGState.() -> Unit,
                        var enterAction: (() -> Unit)? = null,
-                       var loopAction: (() -> Boolean)? = null,
+                       var loopAction: (() -> Boolean)? = { true },
                        var exitAction: (() -> Unit)? = null,
                        var isCompleted: Boolean = false
     )
