@@ -4,17 +4,16 @@ import utils.OneTime
 class AGStateMachine(mainBlock: AGStateMachine.() -> Unit) {
     private val states = mutableListOf<AGState>()
     private var currentState = 0
-    val runningState get() = states[currentState]
+    private val runningState get() = states[currentState]
     var allStatesCompleted = false
 
-    private val stateTimer = ActionTimer()
-    private val captureTimeOneTime = OneTime()
     private var capturedTime = 0.0
-    private val oneTimes = arrayListOf(OneTime(), OneTime())
+    private val stateTimer = ActionTimer()
+    private val oneTimes = arrayListOf(OneTime(), OneTime(), OneTime())
+    private var transition: (() -> Unit) = {}
 
     init {
         oneTimes.forEach { it.reset() }
-        captureTimeOneTime.reset()
         states.clear()
         stateTimer.reset()
         mainBlock()
@@ -24,7 +23,6 @@ class AGStateMachine(mainBlock: AGStateMachine.() -> Unit) {
         if (runCustomTransition) transition.invoke()
         oneTimes.forEach { it.reset() }
         capturedTime = 0.0
-        captureTimeOneTime.reset()
         resetTimer()
     }
 
@@ -48,33 +46,29 @@ class AGStateMachine(mainBlock: AGStateMachine.() -> Unit) {
     }
 
     fun captureTime(): Double {
-        captureTimeOneTime.runAction { capturedTime = stateTimer.seconds }
+        oneTimes[1].runAction { capturedTime = stateTimer.seconds }
         return capturedTime
     }
 
     fun run(): Boolean {
         if (allStatesCompleted) return true
-        states.forEach {
-            if (it == states[currentState]) {
-                oneTimes.first().runAction {
-                    resetTimer()
-                    states[currentState].enterAction?.invoke()
-                }
-                val exit = states[currentState].loopAction?.invoke()!!
-                when {
-                    exit && states[currentState].exitAction == null -> {
-                        states[currentState].isCompleted = true
-                        nextState()
-                    }
+        oneTimes.first().runAction {
+            resetTimer()
+            runningState.enterAction?.invoke()
+        }
+        val exit = runningState.loopAction.invoke()
+        when {
+            exit && runningState.exitAction == null -> {
+                runningState.isCompleted = true
+                nextState()
+            }
 
-                    exit && states[currentState].exitAction != null -> {
-                        oneTimes.last().runAction {
-                            states[currentState].exitAction?.invoke()
-                            states[currentState].isCompleted = true
-                        }
-                        if (!allStatesCompleted) allStatesCompleted = (states[currentState] == states.last()) && (!oneTimes.last().isActive())
-                    }
+            exit && runningState.exitAction != null -> {
+                oneTimes.last().runAction {
+                    runningState.exitAction?.invoke()
+                    runningState.isCompleted = true
                 }
+                if (!allStatesCompleted) allStatesCompleted = (runningState == states.last()) && (!oneTimes.last().isActive())
             }
         }
         return allStatesCompleted
@@ -87,7 +81,6 @@ class AGStateMachine(mainBlock: AGStateMachine.() -> Unit) {
         block(myState)
     }
 
-    private var transition: (() -> Unit) = {}
     infix fun setTransitions(block: () -> Unit): AGStateMachine {
         transition = block
         return this
@@ -126,7 +119,7 @@ class AGStateMachine(mainBlock: AGStateMachine.() -> Unit) {
 
     data class AGState(var name: String, var block: AGState.() -> Unit,
                        var enterAction: (() -> Unit)? = null,
-                       var loopAction: (() -> Boolean)? = { true },
+                       var loopAction: (() -> Boolean) = { true },
                        var exitAction: (() -> Unit)? = null,
                        var isCompleted: Boolean = false
     )

@@ -1,3 +1,7 @@
+package test
+
+import AGStateMachine
+
 fun main() {
     var count = 0
     val agsm = AGStateMachine {
