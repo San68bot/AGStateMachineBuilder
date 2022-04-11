@@ -46,13 +46,13 @@ class AGStateMachine(mainBlock: AGStateMachine.() -> Unit) {
     }
 
     fun captureTime(): Double {
-        oneTimes[1].runAction { capturedTime = stateTimer.seconds }
+        oneTimes[1] runAction { capturedTime = stateTimer.seconds }
         return capturedTime
     }
 
     fun run(): Boolean {
         if (allStatesCompleted) return true
-        oneTimes.first().runAction {
+        oneTimes.first() runAction {
             resetTimer()
             runningState.enterAction?.invoke()
         }
@@ -64,7 +64,7 @@ class AGStateMachine(mainBlock: AGStateMachine.() -> Unit) {
             }
 
             exit && runningState.exitAction != null -> {
-                oneTimes.last().runAction {
+                oneTimes.last() runAction {
                     runningState.exitAction?.invoke()
                     runningState.isCompleted = true
                 }

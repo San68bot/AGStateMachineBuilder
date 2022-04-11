@@ -2,10 +2,11 @@ package utils
 
 class OneTime {
     private var oneTimeVar = true
-    fun runAction(runnable: Runnable) {
+
+    infix fun runAction(block: () -> Unit) {
         if (oneTimeVar) {
             oneTimeVar = false
-            runnable.run()
+            block()
         }
     }
 
