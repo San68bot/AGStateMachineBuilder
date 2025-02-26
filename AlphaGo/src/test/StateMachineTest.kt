@@ -6,9 +6,8 @@ fun main() {
     var count = 0
     val agsm = AGStateMachine {
         state("state1") {
-            val bonk = 0
             enter {
-                println("Entering state1: $bonk")
+                println("Entering state1")
             }
 
             loop {
@@ -17,7 +16,6 @@ fun main() {
             }
 
             exit {
-                count++
                 println("Exiting state1")
                 nextState()
             }
